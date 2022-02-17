@@ -1,0 +1,13 @@
+{
+    "name": "jungle/lptracker-bitrix24-integration",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Sergey Shvalev",
+            "email": "heaven.st@yandex.ru"
+        }
+    ],
+    "require": {
+        "lptracker/php-sdk": "^1.2"
+    }
+}
