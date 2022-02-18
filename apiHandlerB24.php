@@ -23,8 +23,6 @@ $project = $obLPTracker->getProjectList()[0];
 
 $obLPTracker->setProjectCallbackUrl($project, 'https://run.jn5.ru/apiHandlerLPTracker.php');
 
-$contact = $obLPTracker->createContact($project->getId(), $details, $contactData, []);
-
 if ($_REQUEST['event'] == 'ONCRMLEADADD') {
     $obRest = new \Jungle\B24([]);
 
@@ -69,7 +67,6 @@ if ($_REQUEST['event'] == 'ONCRMLEADADD') {
         $lead = $obLPTracker->createLead($contact, $leadData, $options);
     }
 
-    //$logMessage = print_r($arLead, true);
-    //$logger->info($logMessage);
-
+    $logMessage = print_r($arLead, true);
+    $logger->info($logMessage);
 }
