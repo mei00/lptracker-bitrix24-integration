@@ -5,13 +5,25 @@ require_once 'classes/Jungle/B24.php';
 use LPTracker\LPTracker;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
-use Monolog\Handler\FirePHPHandler;
 
 define('B24_URL', 'b24-n3i5ee.bitrix24.ru');
 define('B24_TOKEN', 'u87r6ytc3vdkbcan');
 
 $logger = new Logger('logger');
 $logger->pushHandler(new StreamHandler(__DIR__.'/leads.log', Logger::DEBUG));
+
+$obLPTracker = new LPTracker(
+    [
+        'login' => 'heaven.st@yandex.ru',
+        'password' => 'wzT852',
+        'service' => 'b24integration',
+    ]
+);
+$project = $obLPTracker->getProjectList()[0];
+
+$obLPTracker->setProjectCallbackUrl($project, 'https://run.jn5.ru/apiHandlerLPTracker.php');
+
+$contact = $obLPTracker->createContact($project->getId(), $details, $contactData, []);
 
 if ($_REQUEST['event'] == 'ONCRMLEADADD') {
     $obRest = new \Jungle\B24([]);
@@ -23,57 +35,41 @@ if ($_REQUEST['event'] == 'ONCRMLEADADD') {
     if ($arLead) {
         if ($arLead['CONTACT_ID']) {
             $arContact = $obRest->send('crm.contact.get', ['ID' => $arLead['CONTACT_ID']]);
-            $leadName = $arContact['NAME'] . ' ' . $arContact['LAST_NAME'];
+            $leadName = $arContact['NAME'].' '.$arContact['LAST_NAME'];
             $leadPhone = current($arContact['PHONE'])['VALUE'];
         }
         if ($arLead['COMPANY_ID']) {
-
+            /* Для демонстрации загружаем только контакты, не компании */
         }
 
-        $obLPTracker = new LPTracker(
-            [
-                'login' => 'heaven.st@yandex.ru',
-                'password' => 'wzT852',
-                'service' => 'b24integration',
-            ]
-        );
-
-        $projects = $obLPTracker->getProjectList();
+        /* Создание лида в LPTracker */
 
         $details = [
             [
-                'type' => 'email',
-                'data' => 'contact@example.com'
-            ]
+                'type' => 'phone',
+                'data' => $leadPhone,
+            ],
         ];
 
         $contactData = [
-            'name'       => $leadName,
-            'profession' => 'повар',
-            'site'       => 'somecontactsite.ru'
+            'name' => $leadName,
         ];
 
-        $fields = [
-            12345 => 'someValue'
-        ];
-
-        $contact = $obLPTracker->createContact($projects[0]->getId(), $details, $contactData, $fields);
+        $contact = $obLPTracker->createContact($project->getId(), $details, $contactData, []);
 
         $leadData = [
             'name' => $leadName,
-            'source' => 'Sdk'
+            'source' => 'Битрикс24',
         ];
 
         $options = [
-            'callback' => false
+            'callback' => false,
         ];
 
         $lead = $obLPTracker->createLead($contact, $leadData, $options);
-
     }
 
-    $logMessage = print_r($arLead, true);
-
-    $logger->info($logMessage);
+    //$logMessage = print_r($arLead, true);
+    //$logger->info($logMessage);
 
 }
