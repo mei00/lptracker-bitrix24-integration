@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\IntegrationController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+*/
+
+Route::any('b24-handler', 'App\Http\Controllers\Api\IntegrationController@handle');
