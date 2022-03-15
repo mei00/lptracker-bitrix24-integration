@@ -1,0 +1,8 @@
+POST https://run.jn5.ru/api/b24-handler
+Content-Type: application/json
+
+{
+  "id": 999,
+  "value": "content"
+}
+

@@ -21,7 +21,7 @@ $obLPTracker = new LPTracker(
 );
 $project = $obLPTracker->getProjectList()[0];
 
-$obLPTracker->setProjectCallbackUrl($project, 'https://run.jn5.ru/apiHandlerLPTracker.php');
+// $obLPTracker->setProjectCallbackUrl($project, 'https://run.jn5.ru/apiHandlerLPTracker.php');
 
 if ($_REQUEST['event'] == 'ONCRMLEADADD') {
     $leadId = intval($_REQUEST['data']['FIELDS']['ID']);
