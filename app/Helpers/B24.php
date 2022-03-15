@@ -1,5 +1,6 @@
 <?php
-namespace Helpers;
+
+namespace App\Helpers;
 
 /**
  * Class B24
@@ -29,7 +30,7 @@ class B24
      * @return mixed
      */
     public function __construct($arParams) {
-        if ($arParams['B24_URL']) {
+        if (isset($arParams['B24_URL']) && $arParams['B24_URL']) {
             $this->url = $arParams['B24_URL'];
         } else {
             if (defined('B24_URL')) {
@@ -39,7 +40,7 @@ class B24
                 return false;
             }
         }
-        if ($arParams['B24_TOKEN']) {
+        if (isset($arParams['B24_TOKEN']) && $arParams['B24_TOKEN']) {
             $this->token = $arParams['B24_TOKEN'];
         } else {
             if (defined('B24_TOKEN')) {

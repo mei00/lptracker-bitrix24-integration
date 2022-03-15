@@ -4,12 +4,24 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Http;
+
 use App\Models\LeadsQueue;
+
+use App\Helpers\B24;
 
 use LPTracker\LPTracker;
 
 class IntegrationController extends Controller
 {
+    public function __construct() {
+        define('B24_URL', 'b24-4f8lrq.bitrix24.ru');
+        define('B24_TOKEN', '167gcio6199wev6l');
+        define('B24_STAGE_CALL', 'UC_4SR390');
+        define('LPT_LEAD_B24_ID', 1803704);
+    }
+
+
     /**
      * Handle request from Bitrix24
      *
@@ -19,11 +31,6 @@ class IntegrationController extends Controller
      */
     public function handle(Request $request)
     {
-        define('B24_URL', 'b24-4f8lrq.bitrix24.ru');
-        define('B24_TOKEN', '167gcio6199wev6l');
-
-        define('LPT_LEAD_B24_ID', 1803704);
-
         /*
          * Создание записи в таблице очереди лидов
 
@@ -78,30 +85,26 @@ class IntegrationController extends Controller
 
     public function seedLeads(Request $request)
     {
-        define('B24_URL', 'b24-4f8lrq.bitrix24.ru');
-        define('B24_TOKEN', '167gcio6199wev6l');
+        $names = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $response = Http::get('https://namey.muffinlabs.com/name.json?count=10&with_surname=true&frequency=all');
+            $names = array_merge($names, $response->json());
+        }
 
-        define('LPT_LEAD_B24_ID', 1803704);
+        $obRest = new B24([]);
 
-        /*
-        $obRest = new \Jungle\B24([]);
+        for ($i = 1; $i <= 100; $i++) {
 
-        for ($i = 1; $i <= 1000; $i++) {
-
-            echo $i;
-            echo '<br>';
-
-            $name = 'Петр';
-            $lastName = 'Петров';
+            $name = explode(' ', $names[$i - 1]);
 
             $arContactFields = [
                 'FIELDS' => [
-                    'NAME' => $name,
-                    'LAST_NAME' => $lastName,
+                    'NAME' => $name[0],
+                    'LAST_NAME' => $name[1],
                     'TYPE_ID' => 'CLIENT',
                     'PHONE' => [
                         [
-                            'VALUE' => '+79061233411',
+                            'VALUE' => '+7' . rand(1000000000, 9999999999),
                             'VALUE_TYPE' => 'PERSONAL'
                         ]
                     ]
@@ -114,24 +117,32 @@ class IntegrationController extends Controller
             $arLeadFields = [
                 'FIELDS' => [
                     'CONTACT_ID' => $contactId,
-                    'STATUS_ID' => B24_STAGE_DONT_LOAD,
+                    'STATUS_ID' => B24_STAGE_CALL,
                 ],
                 'PARAMS' => ['REGISTER_SONET_EVENT' => 'N'],
             ];
 
             $requestResult = $obRest->send('crm.lead.add', $arLeadFields);
-
-            break;
         }
-        */
 
     }
 
 
     public function importLeads(Request $request)
     {
+        $obRest = new B24([]);
 
-        return "I'M HERE";
+        $b24Request = [
+            'filter' => [
+                'STAGE_ID' => B24_STAGE_CALL
+            ],
+        ];
+
+        $requestResult = $obRest->send('crm.lead.list', $b24Request);
+
+        dump($requestResult);
+
+        return $requestResult;
     }
 
     public function exportLeads(Request $request)
