@@ -19,6 +19,9 @@ class IntegrationController extends Controller
      */
     public function handle(Request $request)
     {
+        define('B24_URL', 'b24-4f8lrq.bitrix24.ru');
+        define('B24_TOKEN', '167gcio6199wev6l');
+
         define('LPT_LEAD_B24_ID', 1803704);
 
         //$leads = Room::where('creator', Auth::id())->with('language')->get();
