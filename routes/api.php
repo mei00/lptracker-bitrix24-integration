@@ -23,3 +23,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 */
 
 Route::any('b24-handler', 'App\Http\Controllers\Api\IntegrationController@handle');
+Route::any('import', 'App\Http\Controllers\Api\IntegrationController@importLeads');
+Route::any('export', 'App\Http\Controllers\Api\IntegrationController@exportLeads');
