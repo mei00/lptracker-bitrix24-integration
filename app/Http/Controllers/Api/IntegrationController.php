@@ -22,55 +22,6 @@ class IntegrationController extends Controller
         define('B24_QUEUED', 'UF_CRM_1647399883514');
     }
 
-
-    /**
-     * Handle request from Bitrix24
-     *
-     * @param \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function handle(Request $request)
-    {
-        $obLPTracker = new LPTracker(
-            [
-                'login' => 'heaven.st@yandex.ru',
-                'password' => 'wzT852',
-                'service' => 'b24integration',
-            ]
-        );
-        $project = $obLPTracker->getProjectList()[0];
-
-        /* Создание лида в LPTracker */
-        $details = [
-            [
-                'type' => 'phone',
-                'data' => '+7 (982) 324-32-12',
-            ],
-        ];
-        $contactData = [
-            'name' => 'Петр Иванов',
-        ];
-        $contact = $obLPTracker->createContact($project->getId(), $details, $contactData, []);
-        $leadData = [
-            'name' => 'Петр Иванов',
-            'source' => 'Битрикс24',
-        ];
-        $options = [
-            'callback' => false,
-            'custom' => [
-                LPT_LEAD_B24_ID => 444,
-            ],
-        ];
-        $obLptLead = $obLPTracker->createLead($contact, $leadData, $options);
-
-
-        return $obLptLead;
-
-        return [1, 2, 3];
-    }
-
-
     public function seedLeads(Request $request)
     {
         $names = [];
@@ -116,7 +67,7 @@ class IntegrationController extends Controller
     }
 
 
-    public function importLeads(Request $request)
+    public function exportLeads(Request $request)
     {
         $obRest = new B24([]);
 
@@ -161,14 +112,8 @@ class IntegrationController extends Controller
     }
 
 
-    public function exportLeads(Request $request)
+    public function importLeads(Request $request)
     {
-        /*
-         1. Получить 20 ещё не экспортированных записей LeadsQueue
-         2. В цикле по ним создать N лидов в LPTracker
-         3. В каждой итерации цикла - обновлять соответствующую запись LeadsQueue
-         */
-
         $obLPTracker = new LPTracker(
             [
                 'login' => 'heaven.st@yandex.ru',
@@ -210,8 +155,10 @@ class IntegrationController extends Controller
                 $lead->save();
 
             }
+
             return $obLptLead;
         } else {
+
             return 'All data has been exported already';
         }
     }
