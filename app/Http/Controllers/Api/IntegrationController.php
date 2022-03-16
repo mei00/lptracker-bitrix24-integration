@@ -32,19 +32,6 @@ class IntegrationController extends Controller
      */
     public function handle(Request $request)
     {
-        /*
-         * Создание записи в таблице очереди лидов
-
-        $lead = LeadsQueue::create([
-            'lptracker_id' => 5,
-            'bitrix_id' => 6,
-            'name' => 'Петр Иванов',
-            'phone' => '+7 (982) 324-32-12',
-            'is_exported' => 0,
-        ]);
-        */
-
-
         $obLPTracker = new LPTracker(
             [
                 'login' => 'heaven.st@yandex.ru',
@@ -135,15 +122,42 @@ class IntegrationController extends Controller
 
         $b24Request = [
             'filter' => [
-                'STATUS_ID' => B24_STAGE_CALL
+                'STATUS_ID' => B24_STAGE_CALL,
+                B24_QUEUED => false,
             ],
         ];
 
-        $requestResult = $obRest->send('crm.lead.list', $b24Request);
+        $arLeads = $obRest->send('crm.lead.list', $b24Request);
 
-        dump($requestResult);
+        foreach ($arLeads as $arLead) {
+            $arContact = $obRest->send('crm.contact.get', ['ID' => $arLead['CONTACT_ID']]);
+            $leadName = $arContact['NAME'].' '.$arContact['LAST_NAME'];
+            $leadPhone = current($arContact['PHONE'])['VALUE'];
 
-        return $requestResult;
+            $lead = LeadsQueue::where('bitrix_id', $arLead['ID'])->first();
+
+            if ($lead === null) {
+                LeadsQueue::create([
+                   'lptracker_id' => 0,
+                   'bitrix_id' => $arLead['ID'],
+                   'name' => $leadName,
+                   'phone' => $leadPhone,
+                   'is_exported' => 0,
+                ]);
+
+                $arUpdateFields = [
+                    'ID' => $arLead['ID'],
+                    'FIELDS' => [
+                        B24_QUEUED => true,
+                    ],
+                ];
+                $obRest->send('crm.lead.update', $arUpdateFields);
+            }
+
+
+        }
+
+        return true;
     }
 
 
