@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
-Artisan::command('inspire', function () {
+Artisan::command('export', function () {
+    app('App\Http\Controllers\Api\IntegrationController')->exportLeads();
+});
 
-    $this->comment(Inspiring::quote());
-
+Artisan::command('import', function () {
+    app('App\Http\Controllers\Api\IntegrationController')->importLeads();
 });

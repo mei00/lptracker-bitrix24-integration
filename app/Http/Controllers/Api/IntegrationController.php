@@ -22,7 +22,7 @@ class IntegrationController extends Controller
         define('B24_QUEUED', 'UF_CRM_1647399883514');
     }
 
-    public function seedLeads(Request $request)
+    public function seedLeads()
     {
         $names = [];
         for ($i = 1; $i <= 10; $i++) {
@@ -67,7 +67,7 @@ class IntegrationController extends Controller
     }
 
 
-    public function exportLeads(Request $request)
+    public function exportLeads()
     {
         $obRest = new B24([]);
 
@@ -104,15 +104,13 @@ class IntegrationController extends Controller
                 ];
                 $obRest->send('crm.lead.update', $arUpdateFields);
             }
-
-
         }
 
         return true;
     }
 
 
-    public function importLeads(Request $request)
+    public function importLeads()
     {
         $obLPTracker = new LPTracker(
             [
@@ -143,20 +141,22 @@ class IntegrationController extends Controller
                 $leadData = [
                     'name' => $lead->name,
                     'source' => 'Битрикс24',
+                    'funnel' => "1648186",
                 ];
                 $options = [
                     'callback' => false
                 ];
                 $obLptLead = $obLPTracker->createLead($contact, $leadData, $options);
 
+                if ($obLptLead) {
+                    $lead->lptracker_id = $obLptLead->getId();
+                    $lead->is_exported = 1;
 
-                $lead->is_exported = 1;
-
-                $lead->save();
-
+                    $lead->save();
+                }
             }
 
-            return $obLptLead;
+            return true;
         } else {
 
             return 'All data has been exported already';
