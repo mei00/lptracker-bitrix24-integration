@@ -19,6 +19,7 @@ class IntegrationController extends Controller
         define('B24_TOKEN', '167gcio6199wev6l');
         define('B24_STAGE_CALL', 'UC_4SR390');
         define('LPT_LEAD_B24_ID', 1803704);
+        define('B24_QUEUED', 'UF_CRM_1647399883514');
     }
 
 
@@ -134,7 +135,7 @@ class IntegrationController extends Controller
 
         $b24Request = [
             'filter' => [
-                'STAGE_ID' => B24_STAGE_CALL
+                'STATUS_ID' => B24_STAGE_CALL
             ],
         ];
 
