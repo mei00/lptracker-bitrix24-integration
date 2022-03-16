@@ -145,6 +145,7 @@ class IntegrationController extends Controller
         return $requestResult;
     }
 
+
     public function exportLeads(Request $request)
     {
         /*
@@ -153,14 +154,51 @@ class IntegrationController extends Controller
          3. В каждой итерации цикла - обновлять соответствующую запись LeadsQueue
          */
 
-        $leads = LeadsQueue::where('is_exported', false)->get();
+        $obLPTracker = new LPTracker(
+            [
+                'login' => 'heaven.st@yandex.ru',
+                'password' => 'wzT852',
+                'service' => 'b24integration',
+            ]
+        );
 
-        $arLeads = [];
-        foreach ($leads as $lead) {
-            $arLeads[] = $lead->toArray();
+        $project = $obLPTracker->getProjectList()[0];
+
+        $leads = LeadsQueue::where('is_exported', false)->limit(10)->get();
+
+        if (!$leads->isEmpty()) {
+            foreach ($leads as $lead) {
+
+                $details = [
+                    [
+                        'type' => 'phone',
+                        'data' => $lead->phone,
+                    ],
+                ];
+                $contactData = [
+                    'name' => $lead->name,
+                ];
+                $contact = $obLPTracker->createContact($project->getId(), $details, $contactData, []);
+
+                $leadData = [
+                    'name' => $lead->name,
+                    'source' => 'Битрикс24',
+                ];
+                $options = [
+                    'callback' => false
+                ];
+                $obLptLead = $obLPTracker->createLead($contact, $leadData, $options);
+
+
+                $lead->is_exported = 1;
+
+                $lead->save();
+
+            }
+            return $obLptLead;
+        } else {
+            return 'All data has been exported already';
         }
-
-        return print_r($arLeads, true);
     }
 
 
